@@ -13,12 +13,20 @@ document.addEventListener("DOMContentLoaded", () => {
   function calculateValidMoves(id) {
     return [id + 1, id + width, id - 1, id - width];
   }
+  function getRandomImageURL() {
+    const randomNum = Math.floor(Math.random() * candyColors.length);
+    const randomColor = candyColors[randomNum];
+    const imageUrl = `./images/${randomColor}-candy.png`;
+    const io = `url(${imageUrl})`;
+    console.log({ io });
+    return io;
+  }
 
   function createBoard() {
     for (let i = 0; i < width * width; i++) {
       const square = document.createElement("div");
-      const randomColor = Math.floor(Math.random() * candyColors.length);
-      square.style.backgroundColor = candyColors[randomColor];
+      square.style.backgroundImage = getRandomImageURL();
+      console.log({ square });
       square.setAttribute("draggable", true);
       square.setAttribute("id", i);
 
@@ -42,12 +50,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
   function dragStart() {
-    selectedColor = this.style.backgroundColor;
+    selectedColor = this.style.backgroundImage;
     selectedSquareId = parseInt(this.id);
     console.log(selectedSquareId);
   }
   function dragOver() {
-    replacedColor = this.style.backgroundColor;
+    replacedColor = this.style.backgroundImage;
     replacedSquareId = parseInt(this.id);
   }
 
@@ -56,28 +64,31 @@ document.addEventListener("DOMContentLoaded", () => {
     const isValidMove = validMoves.includes(replacedSquareId);
     const isBlank = replacedColor === "" || selectedColor === "";
     if (isValidMove && !isBlank) {
-      squares[replacedSquareId].style.backgroundColor = selectedColor;
-      squares[selectedSquareId].style.backgroundColor = replacedColor;
+      squares[replacedSquareId].style.backgroundImage = selectedColor;
+      squares[selectedSquareId].style.backgroundImage = replacedColor;
     }
   }
 
   function checkForMatchingRows() {
     let squaresInRowCount = 0;
 
-    for (let i = 0; i < width * width - 1; i++) {
-      const isMultipleOfWidth = (i + 1) % width === 0;
-      const isBlank = squares[i].style.backgroundColor === "";
-      const similarInRow =
-        squares[i].style.backgroundColor ===
-        squares[i + 1].style.backgroundColor;
+    for (let i = 0; i <= width * width - 1; i++) {
+      const endOfRow = (i + 1) % width === 0;
+      const isBlank = squares[i].style.backgroundImage === "";
+      const similarInRow = squares[i + 1]
+        ? squares[i].style.backgroundImage ===
+          squares[i + 1].style.backgroundImage
+        : false;
 
-      if (similarInRow && !isBlank && !isMultipleOfWidth) {
+      // console.log({ endOfRow }, { i });
+      if (similarInRow && !isBlank && !endOfRow) {
         squaresInRowCount++;
       } else if (squaresInRowCount < 2) {
         squaresInRowCount = 0;
-      } else {
+      }
+      if (squaresInRowCount >= 2 && (!similarInRow || endOfRow)) {
         for (let j = i - squaresInRowCount; j <= i; j++) {
-          squares[j].style.backgroundColor = "";
+          squares[j].style.backgroundImage = "";
         }
         squaresInRowCount = 0;
       }
@@ -88,48 +99,74 @@ document.addEventListener("DOMContentLoaded", () => {
     // original  to reset the i count everytime it finishes a column
     let originalI = 0;
     // width -2 to stop it at the 6th row
-    for (let i = 0; i < width * (width - 1); i += width) {
-      // console.log({ i });
-      const resetColumn = i - width * (width - 2) === originalI;
-      const lastRow = i + width === originalI + (width * width - 1);
+    for (let i = 0; i < width * width; i += width) {
+      let resetColumn = i - width * (width - 1) === originalI;
 
-      const isBlank = squares[i].style.backgroundColor === "";
+      const isBlank = squares[i].style.backgroundImage === "";
       const similarInColumn = squares[i + width]
-        ? squares[i].style.backgroundColor ===
-          squares[i + width].style.backgroundColor
+        ? squares[i].style.backgroundImage ===
+          squares[i + width].style.backgroundImage
         : false;
-
-      console.log({ resetColumn }, { i });
-      if (similarInColumn && !isBlank) {
+      if (similarInColumn) {
         squaresInColumnCount++;
-        // console.log({ i });
       } else if (squaresInColumnCount < 2) {
         squaresInColumnCount = 0;
       }
       if (squaresInColumnCount >= 2 && (resetColumn || !similarInColumn)) {
         // squaresInColumn - 1 in case of resetcolumn cause we're still in the square before last
         // in !similarIncolumn we're in the last square
-        for (let j = i - squaresInColumnCount * width; j <= i; j += width) {
-          // console.log({ i });
-          // console.log({ j });
-          // console.log({ squaresInColumnCount });
-          // console.log({ resetColumn });
-          squares[j].style.backgroundColor = "";
+        const newI = i;
+        for (
+          let j = newI - squaresInColumnCount * width;
+          j <= newI;
+          j += width
+        ) {
+          squares[j].style.backgroundImage = "";
         }
         squaresInColumnCount = 0;
       }
 
-      // console.log({ resetColumn }, i);
       if (resetColumn) {
-        // console.log({ i }, { originalI });
         originalI++;
         // - widthh because next iteration will be i+=width
+        // or else i would start from second row
         i = originalI - width;
+        squaresInColumnCount = 0;
       }
     }
   }
 
+  function moveAndGenerate() {
+    for (let i = 0; i < width * (width - 1); i++) {
+      moveDown(i);
+      generateNew(i);
+    }
+  }
+  function moveDown(i) {
+    const isLowerBlank = squares[i + width].style.backgroundImage === "";
+    if (isLowerBlank) {
+      // console.log(squares[i].backgroundImage);
+      squares[i + width].style.backgroundImage =
+        squares[i].style.backgroundImage;
+      squares[i].style.backgroundImage = "";
+      generateNew(i);
+    }
+  }
+
+  function generateNew(i) {
+    const isBlank = squares[i].style.backgroundImage === "";
+    const firstRow = [...Array(width).keys()];
+    const isInFirstRow = firstRow.includes(i);
+
+    if (isInFirstRow && isBlank) {
+      squares[i].style.backgroundImage = getRandomImageURL();
+    }
+  }
+
   createEvents();
-  window.setInterval(checkForMatchingRows, 5000);
-  window.setInterval(checkForMatchingColumns, 5000);
+  window.setInterval(() => {
+    moveAndGenerate();
+    checkForMatchingRows();
+    checkForMatchingColumns();
+  }, 100);
 });
