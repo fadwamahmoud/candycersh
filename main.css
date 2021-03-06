@@ -1,11 +1,43 @@
+@font-face {
+  font-family: "Candy Crush Regular";
+  font-style: normal;
+  font-weight: normal;
+  src: local("Candy Crush Regular"), url("CandyCrush-p7RAK.woff") format("woff");
+}
 .grid {
   height: 560px;
   width: 560px;
-  background-color: white;
+  background-color: rgba(44, 130, 201, 0.6);
+  border: 3px solid rgba(4, 71, 126, 0.616);
+  border-radius: 35px;
   display: flex;
   flex-wrap: wrap;
 }
 .grid div {
   height: 70px;
   width: 70px;
+  background-color: transparent;
+}
+.score {
+  min-width: 229px;
+  min-height: 400px;
+  background-image: url("./images/candyscore.png");
+  border: 10px solid #fac2c5;
+  border-radius: 5%;
+  box-shadow: inset 1px 1px 10px rgba(49, 49, 49, 0.363);
+  margin-left: 2vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Candy Crush Regular";
+  color: #f69b2f;
+  text-shadow: -1px -1px 0 #7c2800, 1px -1px 0 #7c2800, -1px 1px 0 #7c2800,
+    1px 1px 0 #7c2800;
+}
+.game {
+  background-image: url("./images/background.png");
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10vh;
 }

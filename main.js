@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let selectedSquareId;
   let replacedColor;
   let replacedSquareId;
+  let score = 0;
 
   createBoard();
 
@@ -34,6 +35,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       squares.push(square);
     }
+  }
+  function changeScore() {
+    const scoreBoard = document.getElementById("score");
+    scoreBoard.innerHTML = score;
   }
   function createEvents() {
     squares.forEach((s) => {
@@ -90,6 +95,8 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let j = i - squaresInRowCount; j <= i; j++) {
           squares[j].style.backgroundImage = "";
         }
+        score += squaresInRowCount;
+        changeScore();
         squaresInRowCount = 0;
       }
     }
@@ -123,6 +130,8 @@ document.addEventListener("DOMContentLoaded", () => {
         ) {
           squares[j].style.backgroundImage = "";
         }
+        score += squaresInColumnCount;
+        changeScore();
         squaresInColumnCount = 0;
       }
 
